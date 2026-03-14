@@ -18,6 +18,7 @@
             justify-content: center;
             align-items: center;
             background-color: #f0f2f5;
+            overflow-x: hidden;
         }
 
         /* --- หน้าล็อกอินพร้อมพื้นหลัง --- */
@@ -29,8 +30,8 @@
             justify-content: center;
             align-items: center;
             /* แก้ไขลิงก์รูปพื้นหลังหน้าแรกตรงนี้ */
-            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-                              url('https://images.unsplash.com/photo-1541339907198-e08756defe04?w=1200'); 
+            background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), 
+                              url('รูป/ทม31.jpg'); 
             background-size: cover;
             background-position: center;
             z-index: 100;
@@ -82,6 +83,7 @@
             box-shadow: 0 8px 15px rgba(0,0,0,0.1);
             transform: rotate(var(--r));
             transition: 0.4s;
+            cursor: zoom-in;
         }
 
         .photo-item:hover {
@@ -95,6 +97,34 @@
             object-fit: cover;
             border-radius: 2px;
         }
+
+        /* --- สไตล์สำหรับตัวซูมรูป (Lightbox) --- */
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 80%;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .lightbox.active { display: flex; }
+        .lightbox.active img { transform: scale(1); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* --- ฟอร์มและปุ่ม --- */
         input { 
@@ -155,10 +185,10 @@
     </div>
 
     <div id="surprise-page">
-        <h1 style="color: #2d3436;">Congratulations <span id="userName" style="color:#ff6b6b;"></span>!</h1>
+        <h1 style="color: #2d3436;">ยินดีด้วยนะคุณ <span id="userName" style="color:#ff6b6b;"></span>!</h1>
         <p>"ขอบคุณที่ร่วมเดินทางมาด้วยกัน วันนี้เธอเก่งมากจริงๆ"</p>
 
-       <div class="photo-container">
+        <div class="photo-container">
             <div class="photo-item" style="--r: -3deg;"><img src="รูป/2f5c4733-98b0-441c-aa84-6bb77a920a65.jpg"></div>
             <div class="photo-item" style="--r: 2deg;"><img src="รูป/07b3a00e-134b-411b-b26d-fa81352c49f0.jpg"></div>
             <div class="photo-item" style="--r: -1deg;"><img src="รูป/38e6b218-2684-412d-8c82-f0aae1972beb.jpg"></div>
@@ -175,12 +205,20 @@
         <button onclick="location.reload()" style="background:#54a0ff; width: auto; padding: 10px 25px;">กลับหน้าแรก</button>
     </div>
 
+    <div id="lightbox" class="lightbox" onclick="closeZoom()">
+        <img id="zoomImg" src="">
+        <p style="position: absolute; bottom: 20px; color: white;">คลิกที่ว่างเพื่อปิด</p>
+    </div>
+
     <div id="music-btn" onclick="toggleMusic()">🎵</div>
 
     <script>
-        // --- ตั้งค่ารหัสผ่านที่นี่ ---
-        const SECRET_CODE = "180369"; // เปลี่ยนเป็นรหัสผ่านที่คุณต้องการ
+        // --- 1. ตั้งค่ารหัสผ่านที่นี่ ---
+        const SECRET_CODE = "180369"; // เปลี่ยนเป็นรหัสที่ต้องการ
 
+        const music = document.getElementById('bgMusic');
+
+        // --- 2. ฟังก์ชันตรวจสอบการล็อกอิน ---
         function handleLogin() {
             const name = document.getElementById('nameInput').value.trim();
             const pass = document.getElementById('passInput').value.trim();
@@ -195,10 +233,9 @@
             }
         }
 
+        // --- 3. ฟังก์ชันแสดงหน้าเซอร์ไพรส์ ---
         function showSurprise(name) {
             document.getElementById('userName').innerText = name;
-            
-            // ซ่อนหน้าล็อกอิน
             const loginPage = document.getElementById('login-page');
             loginPage.style.opacity = '0';
             
@@ -207,11 +244,8 @@
                 document.getElementById('surprise-page').style.display = 'block';
                 document.getElementById('music-btn').style.display = 'flex';
                 
-                // เริ่มเล่นเพลง
-                const music = document.getElementById('bgMusic');
                 music.play().catch(e => console.log("ต้องการการตอบโต้ก่อนเล่นเพลง"));
 
-                // เอฟเฟกต์พลุ
                 confetti({
                     particleCount: 150,
                     spread: 70,
@@ -220,8 +254,22 @@
             }, 800);
         }
 
+        // --- 4. ระบบซูมรูปภาพ (Lightbox) ---
+        document.querySelectorAll('.photo-item img').forEach(image => {
+            image.onclick = () => {
+                const lightbox = document.getElementById('lightbox');
+                const zoomImg = document.getElementById('zoomImg');
+                lightbox.classList.add('active');
+                zoomImg.src = image.src;
+            };
+        });
+
+        function closeZoom() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+
+        // --- 5. ฟังก์ชันเปิด/ปิดเพลง ---
         function toggleMusic() {
-            const music = document.getElementById('bgMusic');
             if (music.paused) music.play(); else music.pause();
         }
     </script>
