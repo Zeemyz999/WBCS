@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congratulations | Soft & Smooth Memories</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Kanit', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f9fa;
+            overflow-x: hidden;
+            transition: background 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* --- หน้าแรก --- */
+        #login-page { 
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                              url('รูป/ทม31.jpg'); 
+            background-size: cover;
+            background-position: center;
+            z-index: 100;
+            transition: opacity 1s ease-in-out, visibility 1s;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            max-width: 380px;
+            width: 90%;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* --- หน้าเซอร์ไพรส์ --- */
+        #surprise-page {
+            display: none;
+            width: 95%;
+            max-width: 900px;
+            text-align: center;
+            padding: 50px 20px;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), 
+                              url(''); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            border-radius: 40px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.1);
+            margin: 40px auto;
+            animation: slideUp 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Photo Gallery --- */
+        .photo-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .photo-item {
+            background: #fff;
+            padding: 12px;
+            border-radius: 4px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transform: rotate(var(--r)) scale(1);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+        }
+
+        .photo-item:hover {
+            transform: rotate(0deg) scale(1.1);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+
+        .photo-item img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+
+        /* --- Soft Lightbox (ตัวซูมที่นุ่มนวล) --- */
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px); /* เอฟเฟกต์เบลอพื้นหลัง */
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .lightbox img {
+            max-width: 85%;
+            max-height: 80%;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            transform: scale(0.7);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .lightbox.active {
+            display: flex;
+            opacity: 1;
+        }
+        .lightbox.active img {
+            transform: scale(1);
+        }
+
+        /* --- UI Elements --- */
+        input { 
+            padding: 15px; border-radius: 15px; border: 1px solid #eee; 
+            width: 100%; margin-bottom: 12px; font-family: 'Kanit';
+            background: rgba(255,255,255,0.8); transition: 0.3s;
+        }
+        input:focus { border-color: #ffb8b8; background: #fff; box-shadow: 0 0 10px rgba(255,184,184,0.3); outline: none; }
+
+        button { 
+            padding: 15px; background: #ffb8b8; color: white; border: none; 
+            border-radius: 15px; cursor: pointer; font-family: 'Kanit';
+            font-weight: bold; width: 100%; transition: 0.4s;
+            box-shadow: 0 10px 20px rgba(255,184,184,0.4);
+        }
+        button:hover { background: #ff9e9e; transform: translateY(-3px); box-shadow: 0 15px 25px rgba(255,184,184,0.5); }
+
+        #music-btn {
+            position: fixed; bottom: 30px; right: 30px;
+            background: white; color: #ffb8b8; border-radius: 50%;
+            width: 60px; height: 60px; display: none;
+            justify-content: center; align-items: center; cursor: pointer; 
+            z-index: 1000; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            font-size: 24px; transition: 0.3s;
+        }
+        #music-btn:hover { transform: rotate(15deg) scale(1.1); }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop>
+        <source src="บทเพลงแทนหัวใจ Our Fav Song ใจดี.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="login-page">
+        <div class="login-card">
+            <h2 style="margin-top:0; color: #555;">The Last Memory 🎓</h2>
+            <p style="color:#888; font-weight: 300;">ความทรงจำจะงดงามเสมอเมื่อนึกถึง</p>
+            <input type="text" id="nameInput" placeholder="ชื่อของคุณ" autocomplete="off">
+            <input type="password" id="passInput" placeholder="รหัสผ่าน" autocomplete="off">
+            <button onclick="handleLogin()">เดินทางย้อนวันวาน ✨</button>
+            <p id="errorMsg" style="color:#ff7675; font-size:14px; display:none; margin-top:10px;">รหัสผ่านไม่ถูกต้องจ้า</p>
+        </div>
+    </div>
+
+    <div id="surprise-page">
+        <h1 style="color: #444; font-weight: 600;">ยินดีด้วยนะคุณ <span id="userName" style="color:#ffb8b8;"></span></h1>
+        <p style="color: #777;">"ให้ภาพถ่ายเหล่านี้เล่าความรู้สึกที่ไม่มีวันจางหาย"</p>
+
+        <div class="photo-container">
+            <div class="photo-item" style="--r: -3deg;"><img src="รูป/2f5c4733-98b0-441c-aa84-6bb77a920a65.jpg"></div>
+            <div class="photo-item" style="--r: 2deg;"><img src="รูป/07b3a00e-134b-411b-b26d-fa81352c49f0.jpg"></div>
+            <div class="photo-item" style="--r: -1deg;"><img src="รูป/38e6b218-2684-412d-8c82-f0aae1972beb.jpg"></div>
+            <div class="photo-item" style="--r: 4deg;"><img src="รูป/81ed58d9-d7da-4814-a282-16d86a53e8dc.jpg"></div>
+            <div class="photo-item" style="--r: -2deg;"><img src="รูป/78216d17-01ab-4d81-a7cd-9adabd5d11e1.jpg"></div>
+            <div class="photo-item" style="--r: 3deg;"><img src="รูป/a21d6973-4012-4c9c-a224-0b85937690e9.jpg"></div>
+            <div class="photo-item" style="--r: -4deg;"><img src="รูป/cafdde21-17ef-4d29-83c6-ab991b7afdad.jpg"></div>
+            <div class="photo-item" style="--r: 1deg;"><img src="รูป/cb4c0988-8dbe-4e88-9f89-21a6dc359479.jpg"></div>
+            <div class="photo-item" style="--r: -2deg;"><img src="รูป/cee8219c-f6c8-47e1-a138-13e615ad2a19.jpg"></div>
+            <div class="photo-item" style="--r: 5deg;"><img src="รูป/ed5efc40-a46e-4cc6-96ed-7ad140eeb3f9.jpg"></div>
+            <div class="photo-item" style="--r: -3deg;"><img src="รูปเซตสอง/2d366ceb-39e2-4054-9c34-b4b309933187.jpg"></div>
+            <div class="photo-item" style="--r: 2deg;"><img src="รูปเซตสอง/2f71b09d-bf19-4203-9718-0c4d531509a9.jpg"></div>
+            <div class="photo-item" style="--r: -1deg;"><img src="รูปเซตสอง/4b2adbc7-7b5d-4f95-b1c0-246586aa8d1e.jpg"></div>
+            <div class="photo-item" style="--r: 4deg;"><img src="รูปเซตสอง/07f5cad9-5693-42d9-97af-a957e98743ce.jpg"></div>
+            <div class="photo-item" style="--r: -2deg;"><img src="รูปเซตสอง/86cfa018-67fd-4f88-bf4b-ba6d4b23aab0.jpg"></div>
+            <div class="photo-item" style="--r: 3deg;"><img src="รูปเซตสอง/87ce296c-fee9-4692-805d-497fb635a8f6.jpg"></div>
+            <div class="photo-item" style="--r: -4deg;"><img src="รูปเซตสอง/a7e03773-a0b6-4cd4-a7aa-e05fa81699cc.jpg"></div>
+            <div class="photo-item" style="--r: 1deg;"><img src="รูปเซตสอง/a8ed24e1-c57c-4432-8183-5c689e87d980.jpg"></div>
+            <div class="photo-item" style="--r: -2deg;"><img src="รูปเซตสอง/bf978570-6619-4cfd-bc2e-2139a077890e.jpg"></div>
+            <div class="photo-item" style="--r: 5deg;"><img src="รูปเซตสอง/fda67013-c02d-4845-8485-7580a98dd57a.jpg"></div>
+        </div>
+
+        <button onclick="location.reload()" style="background:#dfe6e9; color: #636e72; width: auto; padding: 12px 30px; box-shadow: none;">กลับหน้าแรก</button>
+    </div>
+
+    <div id="lightbox" class="lightbox" onclick="closeZoom()"><img id="zoomImg" src=""></div>
+    <div id="music-btn" onclick="toggleMusic()">🎵</div>
+
+    <script>
+        const SECRET_CODE = "180369"; 
+        const music = document.getElementById('bgMusic');
+
+        function handleLogin() {
+            const name = document.getElementById('nameInput').value.trim();
+            const pass = document.getElementById('passInput').value.trim();
+            const error = document.getElementById('errorMsg');
+
+            if (name !== "" && pass === SECRET_CODE) {
+                error.style.display = "none";
+                showSurprise(name);
+            } else {
+                error.style.display = "block";
+                document.getElementById('passInput').value = "";
+            }
+        }
+
+        function showSurprise(name) {
+            document.getElementById('userName').innerText = name;
+            const loginPage = document.getElementById('login-page');
+            loginPage.style.opacity = '0';
+            
+            setTimeout(() => {
+                loginPage.style.display = 'none';
+                document.getElementById('surprise-page').style.display = 'block';
+                document.getElementById('music-btn').style.display = 'flex';
+                
+                // เปลี่ยนพื้นหลังให้สมูท
+                document.body.style.backgroundImage = "url('รูป/ทม3.jpg')";
+                document.body.style.backgroundSize = "cover";
+                document.body.style.backgroundAttachment = "fixed";
+
+                music.play().catch(() => {});
+
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#ffb8b8', '#fff', '#ffeaa7']
+                });
+            }, 800);
+        }
+
+        // ระบบซูมที่นุ่มนวลขึ้น
+        document.querySelectorAll('.photo-item').forEach(item => {
+            item.onclick = () => {
+                const img = item.querySelector('img');
+                const lightbox = document.getElementById('lightbox');
+                const zoomImg = document.getElementById('zoomImg');
+                
+                zoomImg.src = img.src;
+                lightbox.style.display = 'flex';
+                
+                // ใช้ setTimeout เพื่อให้ Transition ของ CSS ทำงาน
+                setTimeout(() => {
+                    lightbox.classList.add('active');
+                }, 10);
+            };
+        });
+
+        function closeZoom() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+            setTimeout(() => {
+                lightbox.style.display = 'none';
+            }, 400); // รอให้ Animation หายไปก่อนค่อยซ่อนจริง
+        }
+
+        function toggleMusic() {
+            if (music.paused) music.play(); else music.pause();
+        }
+    </script>
+</body>
+</html>
